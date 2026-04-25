@@ -1,1 +1,177 @@
-<p>game works!</p>
+<div class="min-h-screen bg-base flex flex-col items-center px-4 py-10">
+  <div class="w-full max-w-md flex flex-col gap-6">
+    <!-- Role Card -->
+    <button
+      (click)="cardRevealed.set(!cardRevealed())"
+      class="relative rounded-2xl p-6 text-center shadow-xl cursor-pointer select-none overflow-hidden h-52 w-full flex flex-col items-center justify-center"
+      [class.bg-primary]="isSpy && cardRevealed()"
+      [class.bg-surface]="!isSpy || !cardRevealed()"
+      [class.border-primary]="isSpy && cardRevealed()"
+      [class.border-border]="!isSpy || !cardRevealed()"
+      [class.border]="true"
+    >
+      @if (!cardRevealed()) {
+        <!-- Hidden state -->
+        <p class="text-muted text-xs uppercase tracking-widest mb-2">Your Role</p>
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-3xl">🔒</div>
+          <p class="text-muted text-sm">Tap to reveal</p>
+        </div>
+      } @else {
+        <!-- Non-spy revealed -->
+        <p class="text-muted text-xs uppercase tracking-widest mb-1">Location</p>
+        <h2 class="text-2xl font-bold text-gold mb-4">{{ location }}</h2>
+        <p class="text-muted text-xs uppercase tracking-widest mb-1">Your Role</p>
+        <h1 class="text-3xl font-bold text-text">{{ role }}</h1>
+        <p class="text-muted text-xs mt-3 opacity-50">Tap to hide</p>
+      }
+    </button>
+
+    <!-- Voting Panel -->
+    @if (isVotingActive()) {
+      <div class="bg-surface border border-primary rounded-2xl p-6 shadow-xl">
+        <p class="text-muted text-xs uppercase tracking-widest mb-1">Accusation</p>
+        <h2 class="text-xl font-bold text-text mb-4">
+          Is <span class="text-primary">{{ accusedPlayerName() }}</span> the spy?
+        </h2>
+
+        @if (voteTally()) {
+          <div class="flex justify-between text-sm text-muted mb-4">
+            <span
+              ><span class="text-danger font-bold">{{ voteTally()!.guilty }}</span> Guilty</span
+            >
+            <span
+              ><span class="text-success font-bold">{{ voteTally()!.notGuilty }}</span> Not
+              Guilty</span
+            >
+            <span>{{ voteTally()!.total }} players</span>
+          </div>
+        }
+
+        @if (hasVoted()) {
+          <p class="text-muted text-sm text-center">Waiting for other players...</p>
+        } @else {
+          <div class="flex gap-3">
+            <button
+              (click)="castVote(true)"
+              class="flex-1 bg-danger hover:opacity-90 text-text font-bold py-3 rounded-lg transition-opacity cursor-pointer"
+            >
+              Guilty
+            </button>
+            <button
+              (click)="castVote(false)"
+              class="flex-1 bg-success hover:opacity-90 text-text font-bold py-3 rounded-lg transition-opacity cursor-pointer"
+            >
+              Not Guilty
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Players -->
+    <div class="bg-surface border border-border rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-muted text-xs uppercase tracking-widest">Players</h2>
+        <p class="text-xs text-muted">Tap to cross out</p>
+      </div>
+      <ul class="flex flex-col gap-2">
+        @for (player of players(); track player.id) {
+          <li
+            (click)="tapPlayer(player)"
+            (keydown.enter)="tapPlayer(player)"
+            (keydown.space)="tapPlayer(player)"
+            tabindex="0"
+            role="button"
+            class="flex items-center justify-between bg-surface-raised rounded-lg px-4 h-14 cursor-pointer transition-opacity"
+            [class.opacity-40]="crossedOutPlayers().has(player.id)"
+          >
+            <div class="flex items-center gap-2">
+              @if (crossedOutPlayers().has(player.id)) {
+                <span class="text-text font-medium line-through">{{ player.name }}</span>
+              } @else {
+                <span class="text-text font-medium">{{ player.name }}</span>
+              }
+              @if (player.id === playerId) {
+                <span class="text-xs text-muted">(you)</span>
+              }
+            </div>
+            @if (player.id !== playerId && !isVotingActive()) {
+              <button
+                (click)="$event.stopPropagation(); accusePlayer(player.id)"
+                class="text-sm bg-danger text-white font-bold px-4 py-2 rounded-full hover:opacity-80 cursor-pointer transition-opacity"
+              >
+                Accuse
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Location Grid -->
+    <div class="bg-surface border border-border rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-muted text-xs uppercase tracking-widest">Locations</h2>
+          <p class="text-xs text-muted mt-1">Tap to cross out</p>
+        </div>
+        <button
+          (click)="toggleGuessingMode()"
+          class="text-xs font-bold px-3 py-2 rounded-lg transition-colors cursor-pointer"
+          [class.bg-gold]="guessingMode()"
+          [class.text-base]="guessingMode()"
+          [class.bg-surface-raised]="!guessingMode()"
+          [class.text-muted]="!guessingMode()"
+        >
+          Guess Location
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        @for (loc of locations(); track loc.id) {
+          <button
+            (click)="tapLocation(loc)"
+            class="relative rounded-lg px-2 text-center text-sm font-medium transition-all cursor-pointer border flex items-center justify-center h-[75px]"
+            [ngClass]="{
+              'border-border': !crossedOutLocations().has(loc.id) && !guessingMode(),
+              'border-gold': guessingMode() && !crossedOutLocations().has(loc.id),
+              'border-transparent': crossedOutLocations().has(loc.id),
+              'bg-surface-raised': !crossedOutLocations().has(loc.id),
+              'bg-surface': crossedOutLocations().has(loc.id),
+              'text-text': !crossedOutLocations().has(loc.id),
+              'text-muted': crossedOutLocations().has(loc.id),
+              'opacity-40': crossedOutLocations().has(loc.id)
+            }"
+          >
+            @if (crossedOutLocations().has(loc.id)) {
+              <span class="line-through">{{ loc.name }}</span>
+            } @else {
+              {{ loc.name }}
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Host Controls -->
+    @if (isHost()) {
+      <div class="bg-surface border border-border rounded-2xl p-6">
+        <p class="text-muted text-xs uppercase tracking-widest mb-3">Host Controls</p>
+        <div class="flex gap-3">
+          <button
+            (click)="endGame(false)"
+            class="flex-1 bg-success hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+          >
+            Players Win
+          </button>
+          <button
+            (click)="endGame(true)"
+            class="flex-1 bg-danger hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+          >
+            Spy Wins
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
