@@ -1,1 +1,91 @@
-<p>lobby works!</p>
+<div class="min-h-screen bg-base flex flex-col items-center px-4 py-10">
+  <div class="w-full max-w-md flex flex-col gap-6">
+    <!-- Header -->
+    <div class="text-center">
+      <p class="text-muted text-xs uppercase tracking-widest mb-1">Room Code</p>
+      <button
+        (click)="copyCode()"
+        class="text-4xl font-bold tracking-widest text-gold hover:text-gold-hover transition-colors cursor-pointer"
+      >
+        {{ code }}
+      </button>
+      <p class="text-muted text-xs mt-1">Click to copy</p>
+    </div>
+
+    <!-- Player List -->
+    <div class="bg-surface border border-border rounded-2xl p-6">
+      <h2 class="text-muted text-xs uppercase tracking-widest mb-4">
+        Players ({{ players().length }}/10)
+      </h2>
+
+      <ul class="flex flex-col gap-2">
+        @for (player of players(); track player.id) {
+          <li class="flex items-center justify-between bg-surface-raised rounded-lg px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span class="text-text font-medium">{{ player.name }}</span>
+              @if (player.id === hostPlayerId()) {
+                <span class="text-xs text-gold font-semibold uppercase tracking-wide">Host</span>
+              }
+              @if (player.id === playerId) {
+                <span class="text-xs text-muted">(you)</span>
+              }
+            </div>
+            <div class="flex items-center gap-3">
+              <span
+                class="text-xs font-semibold uppercase tracking-wide"
+                [class.text-success]="player.isReady"
+                [class.text-muted]="!player.isReady"
+              >
+                {{ player.isReady ? 'Ready' : 'Not Ready' }}
+              </span>
+              @if (isHost() && player.id !== playerId) {
+                <button
+                  (click)="kickPlayer(player.id)"
+                  class="text-xs text-danger hover:opacity-80 cursor-pointer transition-opacity"
+                >
+                  Kick
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col gap-3">
+      @if (isHost()) {
+        <button
+          (click)="startGame()"
+          [disabled]="!canStart()"
+          class="w-full bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-text font-bold py-3 rounded-lg transition-colors cursor-pointer"
+        >
+          Start Game
+        </button>
+        @if (players().length < 3) {
+          <p class="text-muted text-xs text-center">Need at least 3 players to start.</p>
+        } @else if (!players().every((p) => p.isReady)) {
+          <p class="text-muted text-xs text-center">Waiting for all players to ready up.</p>
+        }
+      }
+
+      <button
+        (click)="toggleReady()"
+        class="w-full font-bold py-3 rounded-lg transition-colors cursor-pointer text-text"
+        [class.bg-success]="!selfReady()"
+        [class.bg-surface-raised]="selfReady()"
+        [class.border]="selfReady()"
+        [class.border-border]="selfReady()"
+      >
+        {{ selfReady() ? 'Unready' : 'Ready Up' }}
+      </button>
+
+      <button
+        (click)="leaveGame()"
+        class="w-full bg-surface border border-border hover:border-danger text-muted hover:text-danger font-bold py-3 rounded-lg transition-colors cursor-pointer"
+      >
+        Leave Game
+      </button>
+    </div>
+  </div>
+</div>
