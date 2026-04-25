@@ -45,4 +45,4 @@ jobs:
           port: 22
           source: "./dist/spyfall-client/browser/*"
           target: "/var/www/spyfall-client"
-          strip_components: 4
+          strip_components: 3
