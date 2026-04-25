@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GameStatusResponse } from '../models/game-status-response';
+import { LocationResponse } from '../models/location-response';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -19,5 +20,9 @@ export class ApiService {
 
   getGameStatus(code: string): Observable<GameStatusResponse> {
     return this.http.get<GameStatusResponse>(`${this.baseUrl}/${code}`);
+  }
+
+  getLocations(): Observable<LocationResponse[]> {
+    return this.http.get<LocationResponse[]>('/api/locations');
   }
 }
