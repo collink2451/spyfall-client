@@ -1,1 +1,49 @@
-<p>results works!</p>
+<div class="min-h-screen bg-base flex flex-col items-center justify-center px-4 py-10">
+  <div class="w-full max-w-md flex flex-col gap-6">
+
+    <!-- Outcome Banner -->
+    @if (spyWon) {
+      <div class="bg-primary border border-primary rounded-2xl p-8 text-center shadow-xl">
+        <p class="text-text text-xs uppercase tracking-widest mb-2">Game Over</p>
+        <h1 class="text-4xl font-bold text-text mb-1">The Spy Wins</h1>
+        <p class="text-text opacity-70 text-sm">The spy stayed hidden.</p>
+      </div>
+    } @else {
+      <div class="bg-surface border border-success rounded-2xl p-8 text-center shadow-xl">
+        <p class="text-muted text-xs uppercase tracking-widest mb-2">Game Over</p>
+        <h1 class="text-4xl font-bold text-success mb-1">Players Win</h1>
+        <p class="text-muted text-sm">The spy was found out.</p>
+      </div>
+    }
+
+    <!-- Reveal Card -->
+    <div class="bg-surface border border-border rounded-2xl p-6 flex flex-col gap-4">
+      <div class="text-center">
+        <p class="text-muted text-xs uppercase tracking-widest mb-1">The Spy Was</p>
+        <p class="text-2xl font-bold text-primary">{{ spyName }}</p>
+      </div>
+      <div class="border-t border-border"></div>
+      <div class="text-center">
+        <p class="text-muted text-xs uppercase tracking-widest mb-1">The Location Was</p>
+        <p class="text-2xl font-bold text-gold">{{ location }}</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col gap-3">
+      <button
+        (click)="playAgain()"
+        class="w-full bg-primary hover:bg-primary-hover text-text font-bold py-3 rounded-lg transition-colors cursor-pointer"
+      >
+        Play Again
+      </button>
+      <button
+        (click)="leave()"
+        class="w-full bg-surface border border-border hover:border-danger text-muted hover:text-danger font-bold py-3 rounded-lg transition-colors cursor-pointer"
+      >
+        Leave
+      </button>
+    </div>
+
+  </div>
+</div>
