@@ -1,0 +1,48 @@
+name: "Deploy"
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "**/*.md"
+      - "**/*.gitignore"
+      - "**/*.gitattributes"
+  workflow_dispatch:
+    branches:
+      - master
+    paths-ignore:
+      - "**/*.md"
+      - "**/*.gitignore"
+      - "**/*.gitattributes"
+
+jobs:
+  deploy:
+    name: "Deploy Angular Application"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v5
+
+      - name: "Set up Node"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: "Install Dependencies"
+        run: npm ci
+
+      - name: "Build"
+        run: npm run build -- --configuration production
+
+      - name: "Copy Files"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "./dist/spyfall-client/browser/*"
+          target: "/var/www/spyfall-client"
+          strip_components: 4
