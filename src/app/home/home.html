@@ -1,1 +1,79 @@
-<p>home works!</p>
+<div class="min-h-screen bg-base flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <!-- Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-5xl font-bold text-text tracking-widest uppercase">SpyFall</h1>
+      <p class="text-muted mt-2 text-sm tracking-wide">One of you is the spy. Find them.</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-surface border border-border rounded-2xl p-8 shadow-xl">
+      <!-- Mode Toggle -->
+      <div class="flex rounded-lg overflow-hidden border border-border mb-6">
+        <button
+          (click)="setMode('create')"
+          [class.bg-primary]="mode === 'create'"
+          [class.text-text]="mode === 'create'"
+          [class.text-muted]="mode !== 'create'"
+          class="flex-1 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+        >
+          Create Game
+        </button>
+        <button
+          (click)="setMode('join')"
+          [class.bg-primary]="mode === 'join'"
+          [class.text-text]="mode === 'join'"
+          [class.text-muted]="mode !== 'join'"
+          class="flex-1 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+        >
+          Join Game
+        </button>
+      </div>
+
+      <!-- Form -->
+      <div class="space-y-4">
+        <!-- Name -->
+        <div>
+          <label for="name" class="block text-muted text-xs uppercase tracking-widest mb-1"
+            >Your Name</label
+          >
+          <input
+            id="name"
+            [(ngModel)]="name"
+            type="text"
+            maxlength="24"
+            placeholder="Enter your name"
+            class="w-full bg-surface-raised border border-border rounded-lg px-4 py-2 text-text placeholder-muted focus:outline-none focus:border-primary transition-colors"
+          />
+        </div>
+
+        <!-- Room Code (join only) -->
+        @if (mode === 'join') {
+          <div>
+            <label for="code" class="block text-muted text-xs uppercase tracking-widest mb-1"
+              >Room Code</label
+            >
+            <input
+              id="code"
+              [(ngModel)]="code"
+              (input)="code = code.toUpperCase()"
+              type="text"
+              maxlength="6"
+              placeholder="XXXXXX"
+              class="w-full bg-surface-raised border border-border rounded-lg px-4 py-2 text-text placeholder-muted uppercase tracking-widest focus:outline-none focus:border-primary transition-colors"
+            />
+          </div>
+        }
+
+        <!-- Submit -->
+        <button
+          (click)="submit()"
+          [disabled]="loading"
+          class="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-text font-bold py-3 rounded-lg transition-colors duration-150 cursor-pointer mt-2"
+        >
+          {{ loading ? 'Loading...' : mode === 'create' ? 'Create Game' : 'Join Game' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
