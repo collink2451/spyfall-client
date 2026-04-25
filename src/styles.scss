@@ -1,1 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
+@use "tailwindcss";
+
+@theme {
+  /* Backgrounds */
+  --color-base: #0d1117;
+  --color-surface: #161b22;
+  --color-surface-raised: #1f2937;
+
+  /* Brand */
+  --color-primary: #c0392b;
+  --color-primary-hover: #e74c3c;
+
+  /* Accent */
+  --color-gold: #d4ac0d;
+  --color-gold-hover: #f1c40f;
+
+  /* Text */
+  --color-text: #e6edf3;
+  --color-muted: #8b949e;
+
+  /* Utility */
+  --color-border: #30363d;
+  --color-danger: #ff4d4f;
+  --color-success: #3fb950;
+}
