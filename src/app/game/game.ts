@@ -40,12 +40,25 @@ export class Game implements OnInit, OnDestroy {
   crossedOutLocations = signal<Set<number>>(new Set());
   crossedOutPlayers = signal<Set<number>>(new Set());
   guessingMode = signal(false);
+  timerSeconds = signal(600);
+  timerPaused = signal(false);
 
   // Computed
   isHost = computed(() => this.playerId === this.hostPlayerId());
   isVotingActive = computed(() => this.accusedPlayerName() !== null);
+  timerColor = computed(() => {
+    const s = this.timerSeconds();
+    if (s <= 60) return 'text-danger';
+    if (s <= 120) return 'text-warning';
+    return 'text-success';
+  });
+  formattedTime = computed(() => {
+    const s = this.timerSeconds();
+    return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+  });
 
   private subscriptions = new Subscription();
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   async ngOnInit(): Promise<void> {
     this.code = this.route.snapshot.paramMap.get('code') ?? '';
@@ -110,16 +123,78 @@ export class Game implements OnInit, OnDestroy {
       this.gameService.error$.subscribe((message) => this.toastService.show(message, 'error')),
     );
 
+    this.subscriptions.add(
+      this.gameService.timerState$.subscribe(({ seconds, isPaused }) => {
+        this.timerSeconds.set(seconds);
+        this.timerPaused.set(isPaused);
+        if (!isPaused) this.startLocalTimer();
+      }),
+    );
+
+    this.subscriptions.add(
+      this.gameService.timerStarted$.subscribe((seconds) => {
+        this.timerSeconds.set(seconds);
+        this.timerPaused.set(false);
+        this.startLocalTimer();
+      }),
+    );
+
+    this.subscriptions.add(
+      this.gameService.timerPaused$.subscribe((seconds) => {
+        this.timerSeconds.set(seconds);
+        this.timerPaused.set(true);
+        this.stopLocalTimer();
+      }),
+    );
+
+    this.subscriptions.add(
+      this.gameService.timerResumed$.subscribe((seconds) => {
+        this.timerSeconds.set(seconds);
+        this.timerPaused.set(false);
+        this.startLocalTimer();
+      }),
+    );
+
+    this.subscriptions.add(
+      this.gameService.timerSync$.subscribe((seconds) => {
+        this.timerSeconds.set(seconds);
+        if (!this.timerPaused() && this.timerInterval === null) {
+          this.startLocalTimer();
+        }
+      }),
+    );
+
     try {
       await this.gameService.start();
       await this.gameService.joinRoom(this.code, this.playerId);
     } catch {
       this.toastService.show('Could not connect to game server.', 'error');
     }
+
+    try {
+      await this.gameService.getTimerState(this.code);
+    } catch {
+      // Timer may not exist yet if game hasn't started
+    }
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.stopLocalTimer();
+  }
+
+  private startLocalTimer(): void {
+    this.stopLocalTimer();
+    this.timerInterval = setInterval(() => {
+      this.timerSeconds.update((s) => Math.max(0, s - 1));
+    }, 1000);
+  }
+
+  private stopLocalTimer(): void {
+    if (this.timerInterval !== null) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
   }
 
   async accusePlayer(targetId: number): Promise<void> {
@@ -155,28 +230,22 @@ export class Game implements OnInit, OnDestroy {
         this.toastService.show('Failed to submit guess.', 'error');
       });
     } else {
-      this.crossedOutLocations.update((set) => {
-        const next = new Set(set);
-        if (next.has(location.id)) {
-          next.delete(location.id);
-        } else {
-          next.add(location.id);
-        }
-        return next;
-      });
+      this.crossedOutLocations.update((set) => this.toggleSet(set, location.id));
     }
   }
 
   tapPlayer(player: PlayerResponse): void {
-    this.crossedOutPlayers.update((set) => {
-      const next = new Set(set);
-      if (next.has(player.id)) {
-        next.delete(player.id);
-      } else {
-        next.add(player.id);
-      }
-      return next;
-    });
+    this.crossedOutPlayers.update((set) => this.toggleSet(set, player.id));
+  }
+
+  private toggleSet(set: Set<number>, id: number): Set<number> {
+    const next = new Set(set);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    return next;
   }
 
   async endGame(spyWon: boolean): Promise<void> {
@@ -186,4 +255,21 @@ export class Game implements OnInit, OnDestroy {
       this.toastService.show('Failed to end game.', 'error');
     }
   }
+
+  async pauseTimer(): Promise<void> {
+    try {
+      await this.gameService.pauseTimer(this.code, this.playerId);
+    } catch {
+      this.toastService.show('Failed to pause timer.', 'error');
+    }
+  }
+
+  async resumeTimer(): Promise<void> {
+    try {
+      await this.gameService.resumeTimer(this.code, this.playerId);
+    } catch {
+      this.toastService.show('Failed to resume timer.', 'error');
+    }
+  }
+
 }

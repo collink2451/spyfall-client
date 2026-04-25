@@ -59,12 +59,29 @@ export class GameService {
   private playAgainSubject = new Subject<void>();
   playAgain$ = this.playAgainSubject.asObservable();
 
+  private timerStateSubject = new Subject<{ seconds: number; isPaused: boolean }>();
+  timerState$ = this.timerStateSubject.asObservable();
+
+  private timerStartedSubject = new Subject<number>();
+  timerStarted$ = this.timerStartedSubject.asObservable();
+
+  private timerPausedSubject = new Subject<number>();
+  timerPaused$ = this.timerPausedSubject.asObservable();
+
+  private timerResumedSubject = new Subject<number>();
+  timerResumed$ = this.timerResumedSubject.asObservable();
+
+  private timerSyncSubject = new Subject<number>();
+  timerSync$ = this.timerSyncSubject.asObservable();
+
   private errorSubject = new Subject<string>();
   error$ = this.errorSubject.asObservable();
 
   constructor() {
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl('/hubs/game')
+      .withUrl('/hubs/game', {
+        transport: signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling,
+      })
       .withAutomaticReconnect()
       .build();
 
@@ -97,6 +114,21 @@ export class GameService {
       this.ngZone.run(() => this.gameEndedSubject.next({ outcome, location, spyName })),
     );
     this.hub.on('PlayAgain', () => this.ngZone.run(() => this.playAgainSubject.next()));
+    this.hub.on('TimerState', (seconds: number, isPaused: boolean) =>
+      this.ngZone.run(() => this.timerStateSubject.next({ seconds, isPaused })),
+    );
+    this.hub.on('TimerStarted', (seconds: number) =>
+      this.ngZone.run(() => this.timerStartedSubject.next(seconds)),
+    );
+    this.hub.on('TimerPaused', (seconds: number) =>
+      this.ngZone.run(() => this.timerPausedSubject.next(seconds)),
+    );
+    this.hub.on('TimerResumed', (seconds: number) =>
+      this.ngZone.run(() => this.timerResumedSubject.next(seconds)),
+    );
+    this.hub.on('TimerSync', (seconds: number) =>
+      this.ngZone.run(() => this.timerSyncSubject.next(seconds)),
+    );
     this.hub.on('Error', (message: string) =>
       this.ngZone.run(() => this.errorSubject.next(message)),
     );
@@ -147,5 +179,17 @@ export class GameService {
 
   endGame(code: string, playerId: number, spyWon: boolean): Promise<void> {
     return this.hub.invoke('EndGame', code, playerId, spyWon);
+  }
+
+  getTimerState(code: string): Promise<void> {
+    return this.hub.invoke('GetTimerState', code);
+  }
+
+  pauseTimer(code: string, playerId: number): Promise<void> {
+    return this.hub.invoke('PauseTimer', code, playerId);
+  }
+
+  resumeTimer(code: string, playerId: number): Promise<void> {
+    return this.hub.invoke('ResumeTimer', code, playerId);
   }
 }

@@ -1,14 +1,28 @@
 <div class="min-h-screen bg-base flex flex-col items-center px-4 py-10">
   <div class="w-full max-w-md flex flex-col gap-6">
+    <div
+      class="relative bg-surface border border-border rounded-2xl px-6 py-4 flex items-center justify-center overflow-hidden"
+    >
+      <h1 class="text-5xl font-bold font-mono" [ngClass]="timerColor()">
+        {{ formattedTime() }}
+      </h1>
+      @if (timerPaused()) {
+        <div
+          class="absolute inset-0 flex items-end justify-center py-0.5 rounded-2xl"
+          style="background-color: color-mix(in srgb, var(--color-surface-raised) 90%, transparent)"
+        >
+          <p class="text-warning text-sm font-bold uppercase tracking-widest">Paused</p>
+        </div>
+      }
+    </div>
     <!-- Role Card -->
     <button
       (click)="cardRevealed.set(!cardRevealed())"
-      class="relative rounded-2xl p-6 text-center shadow-xl cursor-pointer select-none overflow-hidden h-52 w-full flex flex-col items-center justify-center"
+      class="relative rounded-2xl p-6 text-center shadow-xl cursor-pointer select-none overflow-hidden h-52 w-full flex flex-col items-center justify-center border"
       [class.bg-primary]="isSpy && cardRevealed()"
       [class.bg-surface]="!isSpy || !cardRevealed()"
       [class.border-primary]="isSpy && cardRevealed()"
       [class.border-border]="!isSpy || !cardRevealed()"
-      [class.border]="true"
     >
       @if (!cardRevealed()) {
         <!-- Hidden state -->
@@ -66,6 +80,33 @@
             </button>
           </div>
         }
+      </div>
+    }
+
+    <!-- Host Controls -->
+    @if (isHost()) {
+      <div class="bg-surface border border-border rounded-2xl p-6">
+        <p class="text-muted text-xs uppercase tracking-widest mb-3">Host Controls</p>
+        <div class="flex gap-3">
+          <button
+            (click)="endGame(false)"
+            class="flex-1 bg-success hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+          >
+            Players Win
+          </button>
+          <button
+            (click)="endGame(true)"
+            class="flex-1 bg-danger hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+          >
+            Spy Wins
+          </button>
+          <button
+            (click)="timerPaused() ? resumeTimer() : pauseTimer()"
+            class="flex-1 bg-warning hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+          >
+            {{ timerPaused() ? 'Resume Timer' : 'Pause Timer' }}
+          </button>
+        </div>
       </div>
     }
 
@@ -140,7 +181,7 @@
               'bg-surface': crossedOutLocations().has(loc.id),
               'text-text': !crossedOutLocations().has(loc.id),
               'text-muted': crossedOutLocations().has(loc.id),
-              'opacity-40': crossedOutLocations().has(loc.id)
+              'opacity-40': crossedOutLocations().has(loc.id),
             }"
           >
             @if (crossedOutLocations().has(loc.id)) {
@@ -152,26 +193,5 @@
         }
       </div>
     </div>
-
-    <!-- Host Controls -->
-    @if (isHost()) {
-      <div class="bg-surface border border-border rounded-2xl p-6">
-        <p class="text-muted text-xs uppercase tracking-widest mb-3">Host Controls</p>
-        <div class="flex gap-3">
-          <button
-            (click)="endGame(false)"
-            class="flex-1 bg-success hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
-          >
-            Players Win
-          </button>
-          <button
-            (click)="endGame(true)"
-            class="flex-1 bg-danger hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
-          >
-            Spy Wins
-          </button>
-        </div>
-      </div>
-    }
   </div>
 </div>
