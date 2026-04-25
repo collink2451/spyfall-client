@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
 import { PlayerResponse } from '../models/player-response';
@@ -22,6 +22,7 @@ export interface GameEndedPayload {
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
+  private ngZone = inject(NgZone);
   private hub: signalR.HubConnection;
 
   // Server -> Client events
@@ -55,6 +56,9 @@ export class GameService {
   private gameEndedSubject = new Subject<GameEndedPayload>();
   gameEnded$ = this.gameEndedSubject.asObservable();
 
+  private playAgainSubject = new Subject<void>();
+  playAgain$ = this.playAgainSubject.asObservable();
+
   private errorSubject = new Subject<string>();
   error$ = this.errorSubject.asObservable();
 
@@ -64,27 +68,44 @@ export class GameService {
       .withAutomaticReconnect()
       .build();
 
-    this.hub.on('PlayerJoined', (players: PlayerResponse[]) => this.playerJoinedSubject.next(players));
-    this.hub.on('PlayerLeft', (players: PlayerResponse[]) => this.playerLeftSubject.next(players));
-    this.hub.on('ReadyStateChanged', (players: PlayerResponse[]) => this.readyStateChangedSubject.next(players));
-    this.hub.on('PromotedToHost', () => this.promotedToHostSubject.next());
-    this.hub.on('RemovedFromGame', (reason: string) => this.removedFromGameSubject.next(reason));
+    this.hub.on('PlayerJoined', (players: PlayerResponse[]) =>
+      this.ngZone.run(() => this.playerJoinedSubject.next(players)),
+    );
+    this.hub.on('PlayerLeft', (players: PlayerResponse[]) =>
+      this.ngZone.run(() => this.playerLeftSubject.next(players)),
+    );
+    this.hub.on('ReadyStateChanged', (players: PlayerResponse[]) =>
+      this.ngZone.run(() => this.readyStateChangedSubject.next(players)),
+    );
+    this.hub.on('PromotedToHost', () => this.ngZone.run(() => this.promotedToHostSubject.next()));
+    this.hub.on('RemovedFromGame', (reason: string) =>
+      this.ngZone.run(() => this.removedFromGameSubject.next(reason)),
+    );
     this.hub.on('GameStarted', (role: string | null, location: string | null) =>
-      this.gameStartedSubject.next({ role, location }),
+      this.ngZone.run(() => this.gameStartedSubject.next({ role, location })),
     );
-    this.hub.on('AccusationStarted', (accusedName: string) => this.accusationStartedSubject.next(accusedName));
+    this.hub.on('AccusationStarted', (accusedName: string) =>
+      this.ngZone.run(() => this.accusationStartedSubject.next(accusedName)),
+    );
     this.hub.on('VoteTally', (guilty: number, notGuilty: number, total: number) =>
-      this.voteTallySubject.next({ guilty, notGuilty, total }),
+      this.ngZone.run(() => this.voteTallySubject.next({ guilty, notGuilty, total })),
     );
-    this.hub.on('VoteResult', (result: string) => this.voteResultSubject.next(result));
+    this.hub.on('VoteResult', (result: string) =>
+      this.ngZone.run(() => this.voteResultSubject.next(result)),
+    );
     this.hub.on('GameEnded', (outcome: string, location: string, spyName: string) =>
-      this.gameEndedSubject.next({ outcome, location, spyName }),
+      this.ngZone.run(() => this.gameEndedSubject.next({ outcome, location, spyName })),
     );
-    this.hub.on('Error', (message: string) => this.errorSubject.next(message));
+    this.hub.on('PlayAgain', () => this.ngZone.run(() => this.playAgainSubject.next()));
+    this.hub.on('Error', (message: string) =>
+      this.ngZone.run(() => this.errorSubject.next(message)),
+    );
   }
 
   async start(): Promise<void> {
-    await this.hub.start();
+    if (this.hub.state === signalR.HubConnectionState.Disconnected) {
+      await this.hub.start();
+    }
   }
 
   // Client -> Server methods
@@ -118,6 +139,10 @@ export class GameService {
 
   spyGuessLocation(code: string, locationGuess: string): Promise<void> {
     return this.hub.invoke('SpyGuessLocation', code, locationGuess);
+  }
+
+  playAgain(code: string): Promise<void> {
+    return this.hub.invoke('PlayAgain', code);
   }
 
   endGame(code: string, playerId: number, spyWon: boolean): Promise<void> {
