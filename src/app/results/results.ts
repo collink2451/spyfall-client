@@ -27,6 +27,11 @@ export class Results implements OnInit, OnDestroy {
     return this.outcome === 'SpyWins';
   }
 
+  get locationImageUrl(): string {
+    if (!this.location) return '';
+    return `/images/locations/${this.location.replace(/\s+/g, '')}.png`;
+  }
+
   async ngOnInit(): Promise<void> {
     this.code = localStorage.getItem('code') ?? '';
     this.playerId = Number(localStorage.getItem('playerId'));

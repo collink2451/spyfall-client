@@ -17,15 +17,21 @@
     }
 
     <!-- Reveal Card -->
-    <div class="bg-surface border border-border rounded-2xl p-6 flex flex-col gap-4">
-      <div class="text-center">
+    <div class="bg-surface border border-border rounded-2xl overflow-hidden flex flex-col">
+      <div class="text-center p-6">
         <p class="text-muted text-xs uppercase tracking-widest mb-1">The Spy Was</p>
         <p class="text-2xl font-bold text-primary">{{ spyName }}</p>
       </div>
       <div class="border-t border-border"></div>
-      <div class="text-center">
-        <p class="text-muted text-xs uppercase tracking-widest mb-1">The Location Was</p>
-        <p class="text-2xl font-bold text-gold">{{ location }}</p>
+      <div
+        class="relative text-center flex flex-col items-center justify-center min-h-[120px] overflow-hidden"
+        [style.backgroundImage]="'url(' + locationImageUrl + ')'"
+        [style.backgroundSize]="'cover'"
+        [style.backgroundPosition]="'center'"
+      >
+        <div class="absolute inset-0 bg-black/50"></div>
+        <p class="relative z-10 text-white/70 text-xs uppercase tracking-widest mb-1">The Location Was</p>
+        <p class="relative z-10 text-2xl font-bold text-gold">{{ location }}</p>
       </div>
     </div>
 

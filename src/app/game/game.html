@@ -18,21 +18,38 @@
     <!-- Role Card -->
     <button
       (click)="cardRevealed.set(!cardRevealed())"
-      class="relative rounded-2xl p-6 text-center shadow-xl cursor-pointer select-none overflow-hidden h-52 w-full flex flex-col items-center justify-center border"
+      class="relative rounded-2xl text-center shadow-xl cursor-pointer select-none overflow-hidden h-52 w-full flex flex-col items-center justify-center border bg-surface"
+      [style.backgroundImage]="!isSpy ? 'url(' + imageUrl(location) + ')' : null"
+      [style.backgroundSize]="!isSpy ? 'cover' : null"
+      [style.backgroundPosition]="!isSpy ? 'center' : null"
       [class.bg-primary]="isSpy && cardRevealed()"
-      [class.bg-surface]="!isSpy || !cardRevealed()"
       [class.border-primary]="isSpy && cardRevealed()"
       [class.border-border]="!isSpy || !cardRevealed()"
     >
+      <!-- Dark overlay for non-spy image background -->
+      @if (!isSpy) {
+        <div
+          class="absolute inset-0 transition-colors"
+          [class.bg-black/65]="!cardRevealed()"
+          [class.bg-black/45]="cardRevealed()"
+        ></div>
+      }
       @if (!cardRevealed()) {
         <!-- Hidden state -->
-        <p class="text-muted text-xs uppercase tracking-widest mb-2">Your Role</p>
-        <div class="flex flex-col items-center gap-2">
+        <p class="relative z-10 text-muted text-xs uppercase tracking-widest mb-2">Your Role</p>
+        <div class="relative z-10 flex flex-col items-center gap-2">
           <div class="text-3xl">🔒</div>
           <p class="text-muted text-sm">Tap to reveal</p>
         </div>
-      } @else {
+      } @else if (!isSpy) {
         <!-- Non-spy revealed -->
+        <p class="relative z-10 text-white/70 text-xs uppercase tracking-widest mb-1">Location</p>
+        <h2 class="relative z-10 text-2xl font-bold text-gold mb-4">{{ location }}</h2>
+        <p class="relative z-10 text-white/70 text-xs uppercase tracking-widest mb-1">Your Role</p>
+        <h1 class="relative z-10 text-3xl font-bold text-white">{{ role }}</h1>
+        <p class="relative z-10 text-white/50 text-xs mt-3">Tap to hide</p>
+      } @else {
+        <!-- Spy revealed -->
         <p class="text-muted text-xs uppercase tracking-widest mb-1">Location</p>
         <h2 class="text-2xl font-bold text-gold mb-4">{{ location }}</h2>
         <p class="text-muted text-xs uppercase tracking-widest mb-1">Your Role</p>
@@ -172,22 +189,22 @@
         @for (loc of locations(); track loc.id) {
           <button
             (click)="tapLocation(loc)"
-            class="relative rounded-lg px-2 text-center text-sm font-medium transition-all cursor-pointer border flex items-center justify-center h-[75px]"
+            class="relative rounded-lg text-center text-sm font-medium transition-all cursor-pointer border flex items-center justify-center h-[75px] overflow-hidden bg-surface-raised"
+            [style.backgroundImage]="'url(' + imageUrl(loc.name) + ')'"
+            [style.backgroundSize]="'cover'"
+            [style.backgroundPosition]="'center'"
             [ngClass]="{
               'border-border': !crossedOutLocations().has(loc.id) && !guessingMode(),
               'border-gold': guessingMode() && !crossedOutLocations().has(loc.id),
               'border-transparent': crossedOutLocations().has(loc.id),
-              'bg-surface-raised': !crossedOutLocations().has(loc.id),
-              'bg-surface': crossedOutLocations().has(loc.id),
-              'text-text': !crossedOutLocations().has(loc.id),
-              'text-muted': crossedOutLocations().has(loc.id),
               'opacity-40': crossedOutLocations().has(loc.id),
             }"
           >
+            <div class="absolute inset-0 bg-black/50"></div>
             @if (crossedOutLocations().has(loc.id)) {
-              <span class="line-through">{{ loc.name }}</span>
+              <span class="relative z-10 line-through text-white/50 px-1">{{ loc.name }}</span>
             } @else {
-              {{ loc.name }}
+              <span class="relative z-10 text-white font-semibold px-1">{{ loc.name }}</span>
             }
           </button>
         }

@@ -238,6 +238,11 @@ export class Game implements OnInit, OnDestroy {
     this.crossedOutPlayers.update((set) => this.toggleSet(set, player.id));
   }
 
+  imageUrl(name: string | null): string {
+    if (!name) return '';
+    return `/images/locations/${name.replace(/\s+/g, '')}.png`;
+  }
+
   private toggleSet(set: Set<number>, id: number): Set<number> {
     const next = new Set(set);
     if (next.has(id)) {
