@@ -44,6 +44,8 @@ export class Game implements OnInit, OnDestroy {
   timerPaused = signal(false);
   accuseLoading = signal(false);
   endGameLoading = signal(false);
+  endGamePending = signal<boolean | null>(null);
+  guessLocationPending = signal<LocationResponse | null>(null);
 
   // Computed
   isHost = computed(() => this.playerId === this.hostPlayerId());
@@ -232,12 +234,19 @@ export class Game implements OnInit, OnDestroy {
   tapLocation(location: LocationResponse): void {
     if (this.isSpy && this.guessingMode()) {
       this.guessingMode.set(false);
-      this.gameService.spyGuessLocation(this.code, location.name).catch(() => {
-        this.toastService.show('Failed to submit guess.', 'error');
-      });
+      this.guessLocationPending.set(location);
     } else {
       this.crossedOutLocations.update((set) => this.toggleSet(set, location.id));
     }
+  }
+
+  confirmGuess(): void {
+    const location = this.guessLocationPending();
+    if (!location) return;
+    this.guessLocationPending.set(null);
+    this.gameService.spyGuessLocation(this.code, location.name).catch(() => {
+      this.toastService.show('Failed to submit guess.', 'error');
+    });
   }
 
   tapPlayer(player: PlayerResponse): void {
@@ -259,7 +268,14 @@ export class Game implements OnInit, OnDestroy {
     return next;
   }
 
-  async endGame(spyWon: boolean): Promise<void> {
+  requestEndGame(spyWon: boolean): void {
+    this.endGamePending.set(spyWon);
+  }
+
+  async confirmEndGame(): Promise<void> {
+    const spyWon = this.endGamePending();
+    if (spyWon === null) return;
+    this.endGamePending.set(null);
     if (this.endGameLoading()) return;
     this.endGameLoading.set(true);
     try {
