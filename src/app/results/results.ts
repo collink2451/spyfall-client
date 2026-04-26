@@ -29,7 +29,7 @@ export class Results implements OnInit, OnDestroy {
 
   get locationImageUrl(): string {
     if (!this.location) return '';
-    return `/images/locations/${this.location.replace(/\s+/g, '')}.png`;
+    return `/images/locations/${this.location.replace(/\s+/g, '')}.webp`;
   }
 
   async ngOnInit(): Promise<void> {

@@ -240,7 +240,7 @@ export class Game implements OnInit, OnDestroy {
 
   imageUrl(name: string | null): string {
     if (!name) return '';
-    return `/images/locations/${name.replace(/\s+/g, '')}.png`;
+    return `/images/locations/${name.replace(/\s+/g, '')}.webp`;
   }
 
   private toggleSet(set: Set<number>, id: number): Set<number> {
