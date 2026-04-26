@@ -103,15 +103,17 @@
         <div class="flex gap-3">
           <button
             (click)="endGame(false)"
-            class="flex-1 bg-success hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+            [disabled]="endGameLoading()"
+            class="flex-1 bg-success hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Players Win
+            {{ endGameLoading() ? '...' : 'Players Win' }}
           </button>
           <button
             (click)="endGame(true)"
-            class="flex-1 bg-danger hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm"
+            [disabled]="endGameLoading()"
+            class="flex-1 bg-danger hover:opacity-90 text-text font-bold py-2 rounded-lg transition-opacity cursor-pointer text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Spy Wins
+            {{ endGameLoading() ? '...' : 'Spy Wins' }}
           </button>
           <button
             (click)="timerPaused() ? resumeTimer() : pauseTimer()"
@@ -153,9 +155,10 @@
             @if (player.id !== playerId && !isVotingActive()) {
               <button
                 (click)="$event.stopPropagation(); accusePlayer(player.id)"
-                class="text-sm bg-danger text-white font-bold px-4 py-2 rounded-full hover:opacity-80 cursor-pointer transition-opacity"
+                [disabled]="accuseLoading()"
+                class="text-sm bg-danger text-white font-bold px-4 py-2 rounded-full hover:opacity-80 cursor-pointer transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Accuse
+                {{ accuseLoading() ? '...' : 'Accuse' }}
               </button>
             }
           </li>

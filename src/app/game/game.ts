@@ -42,6 +42,8 @@ export class Game implements OnInit, OnDestroy {
   guessingMode = signal(false);
   timerSeconds = signal(600);
   timerPaused = signal(false);
+  accuseLoading = signal(false);
+  endGameLoading = signal(false);
 
   // Computed
   isHost = computed(() => this.playerId === this.hostPlayerId());
@@ -198,10 +200,14 @@ export class Game implements OnInit, OnDestroy {
   }
 
   async accusePlayer(targetId: number): Promise<void> {
+    if (this.accuseLoading()) return;
+    this.accuseLoading.set(true);
     try {
       await this.gameService.accusePlayer(this.code, targetId);
     } catch {
       this.toastService.show('Failed to accuse player.', 'error');
+    } finally {
+      this.accuseLoading.set(false);
     }
   }
 
@@ -254,10 +260,13 @@ export class Game implements OnInit, OnDestroy {
   }
 
   async endGame(spyWon: boolean): Promise<void> {
+    if (this.endGameLoading()) return;
+    this.endGameLoading.set(true);
     try {
       await this.gameService.endGame(this.code, this.playerId, spyWon);
     } catch {
       this.toastService.show('Failed to end game.', 'error');
+      this.endGameLoading.set(false);
     }
   }
 
