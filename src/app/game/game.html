@@ -215,7 +215,15 @@
 <!-- End Game Confirmation Modal -->
 @if (endGamePending() !== null) {
   <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div class="absolute inset-0 bg-black/60" (click)="endGamePending.set(null)"></div>
+    <div
+      class="absolute inset-0 bg-black/60"
+      role="button"
+      tabindex="0"
+      aria-label="Close dialog"
+      (click)="endGamePending.set(null)"
+      (keydown.enter)="endGamePending.set(null)"
+      (keydown.space)="endGamePending.set(null)"
+    ></div>
     <div class="relative bg-surface border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col gap-4">
       <div>
         <h2 class="text-lg font-bold text-text mb-1">End the game?</h2>
@@ -251,7 +259,15 @@
 <!-- Spy Guess Confirmation Modal -->
 @if (guessLocationPending() !== null) {
   <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div class="absolute inset-0 bg-black/60" (click)="guessLocationPending.set(null)"></div>
+    <div
+      class="absolute inset-0 bg-black/60"
+      role="button"
+      tabindex="0"
+      aria-label="Close dialog"
+      (click)="guessLocationPending.set(null)"
+      (keydown.enter)="guessLocationPending.set(null)"
+      (keydown.space)="guessLocationPending.set(null)"
+    ></div>
     <div class="relative bg-surface border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col gap-4">
       <div>
         <h2 class="text-lg font-bold text-text mb-1">Guess this location?</h2>
