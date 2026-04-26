@@ -1,6 +1,5 @@
 <div class="min-h-screen bg-base flex flex-col items-center justify-center px-4 py-10">
   <div class="w-full max-w-md flex flex-col gap-6">
-
     <!-- Outcome Banner -->
     @if (spyWon) {
       <div class="bg-primary border border-primary rounded-2xl p-8 text-center shadow-xl">
@@ -30,7 +29,9 @@
         [style.backgroundPosition]="'center'"
       >
         <div class="absolute inset-0 bg-black/50"></div>
-        <p class="relative z-10 text-white/70 text-xs uppercase tracking-widest mb-1">The Location Was</p>
+        <p class="relative z-10 text-white/70 text-xs uppercase tracking-widest mb-1">
+          The Location Was
+        </p>
         <p class="relative z-10 text-2xl font-bold text-gold">{{ location }}</p>
       </div>
     </div>
@@ -50,6 +51,5 @@
         Leave
       </button>
     </div>
-
   </div>
 </div>

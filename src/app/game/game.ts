@@ -276,5 +276,4 @@ export class Game implements OnInit, OnDestroy {
       this.toastService.show('Failed to resume timer.', 'error');
     }
   }
-
 }
