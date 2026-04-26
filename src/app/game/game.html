@@ -19,20 +19,16 @@
     <button
       (click)="cardRevealed.set(!cardRevealed())"
       class="relative rounded-2xl text-center shadow-xl cursor-pointer select-none overflow-hidden h-52 w-full flex flex-col items-center justify-center border bg-surface"
-      [style.backgroundImage]="!isSpy ? 'url(' + imageUrl(location) + ')' : null"
-      [style.backgroundSize]="!isSpy ? 'cover' : null"
-      [style.backgroundPosition]="!isSpy ? 'center' : null"
+      [style.backgroundImage]="!isSpy && cardRevealed() ? 'url(' + imageUrl(location) + ')' : null"
+      [style.backgroundSize]="!isSpy && cardRevealed() ? 'cover' : null"
+      [style.backgroundPosition]="!isSpy && cardRevealed() ? 'center' : null"
       [class.bg-primary]="isSpy && cardRevealed()"
       [class.border-primary]="isSpy && cardRevealed()"
       [class.border-border]="!isSpy || !cardRevealed()"
     >
-      <!-- Dark overlay for non-spy image background -->
-      @if (!isSpy) {
-        <div
-          class="absolute inset-0 transition-colors"
-          [class.bg-black/65]="!cardRevealed()"
-          [class.bg-black/45]="cardRevealed()"
-        ></div>
+      <!-- Dark overlay for non-spy image background (only when revealed) -->
+      @if (!isSpy && cardRevealed()) {
+        <div class="absolute inset-0 bg-black/45"></div>
       }
       @if (!cardRevealed()) {
         <!-- Hidden state -->
