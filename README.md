@@ -1,59 +1,59 @@
-# SpyfallClient
+# Spyfall Client
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.8.
+Angular frontend for the Spyfall party game. Players join a room, receive secret roles, and try to identify the spy — or, if you're the spy, figure out the location without giving yourself away. Communicates with [spyfall-api](../spyfall-api) via REST and SignalR for real-time updates.
 
-## Development server
+## Gameplay Flow
 
-To start a local development server, run:
+1. One player creates a game and shares the room code
+2. All players join the lobby and mark themselves ready
+3. The host starts the game — each player receives a location and role (or "Spy" if they're the spy)
+4. Players discuss and vote to identify the spy
+5. Results are shown on the results page
+
+## Tech Stack
+
+- **Framework:** Angular 21
+- **Real-time:** @microsoft/signalr (connects to [spyfall-api](../spyfall-api) hub)
+- **Styling:** TailwindCSS + SCSS
+- **Testing:** Vitest
+
+## Setup
+
+### Requirements
+
+- Node.js 18+
+- Angular CLI (`npm install -g @angular/cli`)
+- A running [spyfall-api](../spyfall-api) instance
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the development server:
 
 ```bash
 ng serve
+# or
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The app will be available at `http://localhost:4200`.
 
-## Code scaffolding
+The dev proxy (`proxy.conf.json`) forwards API requests to `http://localhost:5000` by default — update this if your `spyfall-api` runs on a different port.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Scripts
 
-```bash
-ng generate component component-name
-```
+| Command | Description |
+|---------|-------------|
+| `npm start` / `ng serve` | Start development server |
+| `npm run build` | Build for production |
+| `npm test` | Run unit tests with Vitest |
+| `npm run lint` | Run ESLint |
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Deployment
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The client is deployed at `https://spyfall.collinkoldoff.dev`. Configure the production API URL in the Angular environment files before building for production.
