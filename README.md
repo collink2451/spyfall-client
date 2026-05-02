@@ -1,6 +1,6 @@
 # Spyfall Client
 
-Angular frontend for the Spyfall party game. Players join a room, receive secret roles, and try to identify the spy — or, if you're the spy, figure out the location without giving yourself away. Communicates with [spyfall-api](../spyfall-api) via REST and SignalR for real-time updates.
+Angular frontend for the Spyfall party game. Players join a room, receive secret roles, and try to identify the spy — or, if you're the spy, figure out the location without giving yourself away. Communicates with [spyfall-server](../spyfall-server) via REST and SignalR for real-time updates.
 
 ## Gameplay Flow
 
@@ -13,7 +13,7 @@ Angular frontend for the Spyfall party game. Players join a room, receive secret
 ## Tech Stack
 
 - **Framework:** Angular 21
-- **Real-time:** @microsoft/signalr (connects to [spyfall-api](../spyfall-api) hub)
+- **Real-time:** @microsoft/signalr (connects to [spyfall-server](../spyfall-server) hub)
 - **Styling:** TailwindCSS + SCSS
 - **Testing:** Vitest
 
@@ -23,7 +23,7 @@ Angular frontend for the Spyfall party game. Players join a room, receive secret
 
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
-- A running [spyfall-api](../spyfall-api) instance
+- A running [spyfall-server](../spyfall-server) instance
 
 ### Installation
 
@@ -43,7 +43,7 @@ npm start
 
 The app will be available at `http://localhost:4200`.
 
-The dev proxy (`proxy.conf.json`) forwards API requests to `http://localhost:5000` by default — update this if your `spyfall-api` runs on a different port.
+The dev proxy (`proxy.conf.json`) forwards API requests to `http://localhost:5000` by default — update this if your `spyfall-server` runs on a different port.
 
 ## Scripts
 
