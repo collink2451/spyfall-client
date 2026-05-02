@@ -44,5 +44,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "./dist/spyfall-client/browser/*"
-          target: "/var/www/spyfall-client"
+          target: "/var/www/spyfall/client"
           strip_components: 3
